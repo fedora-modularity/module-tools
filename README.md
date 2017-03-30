@@ -1,2 +1,5 @@
 # module-tools
-Some scripts useful for building modules
+
+### Base Run Time dependency solver 
+* ./brt_dep_solver.sh dhcp-server 
+
