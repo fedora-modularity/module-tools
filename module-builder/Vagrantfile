@@ -15,8 +15,8 @@ dnf -y --enablerepo=updates-testing install module-build-service python2-modulem
 # add docker for using the boltron-preview to test
 dnf -y install docker atomic
 
-systemctl stop docker > /dev/null 2>&1 || :
-groupadd docker > /dev/null 2>&1 || :
+systemctl stop docker >& /dev/null || :
+groupadd docker >& /dev/null || :
 
 usermod -a -G docker vagrant
 systemctl enable docker && systemctl start docker
@@ -34,9 +34,9 @@ dnf -y install python3-solv python3-click fedora-packager
 EOF
 
 $user_script = <<EOF
-mkdir ~/modularity-tools/ > /dev/null 2>&1 || :
-git clone https://github.com/fedora-modularity/baseruntime-package-lists.git ~/modularity-tools/baseruntime-package-lists > /dev/null 2>&1 || :
-git clone https://github.com/fedora-modularity/depchase.git ~/modularity-tools/depchase > /dev/null 2>&1 || :
+mkdir ~/modularity-tools/ >&/dev/null || :
+git clone https://github.com/fedora-modularity/baseruntime-package-lists.git ~/modularity-tools/baseruntime-package-lists >& /dev/null || :
+git clone https://github.com/fedora-modularity/depchase.git ~/modularity-tools/depchase >& /dev/null || :
 cd ~/modularity-tools/depchase && git checkout verbose
 EOF
 
