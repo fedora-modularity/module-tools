@@ -5,7 +5,7 @@
 # The provisioning scripts catch some commands' non-zero exit codes to cope
 # with subsequent runs.
 
-$root_script = <<EOF
+$root_script = <<'EOF'
 dnf -y update
 dnf -y install git make pkgwat
 
@@ -33,7 +33,7 @@ dnf -y install --allowerasing \
 dnf -y install python3-solv python3-click fedora-packager
 EOF
 
-$user_script = <<EOF
+$user_script = <<'EOF'
 mkdir ~/modularity-tools/ >&/dev/null || :
 git clone https://github.com/fedora-modularity/baseruntime-package-lists.git ~/modularity-tools/baseruntime-package-lists >& /dev/null || :
 git clone https://github.com/fedora-modularity/depchase.git ~/modularity-tools/depchase >& /dev/null || :
