@@ -10,7 +10,10 @@ dnf -y update
 dnf -y install git make pkgwat
 
 # make sure we stick to py2 for everything
-dnf -y --enablerepo=updates-testing install module-build-service python2-modulemd python2-pdc-client mock-scm
+dnf -y --enablerepo=updates-testing install module-build-service python2-modulemd python2-pdc-client
+
+dnf -y install --allowerasing \
+    https://kojipkgs.fedoraproject.org//packages/mock/1.3.4/1.fc26/noarch/mock{,-lvm,-scm}-1.3.4-1.fc26.noarch.rpm
 
 # add docker for using the boltron-preview to test
 dnf -y install docker atomic
@@ -25,9 +28,6 @@ chown root:docker /var/run/docker.sock
 docker pull modularitycontainers/boltron-preview
 
 usermod -a -G mock vagrant
-
-dnf -y install --allowerasing \
-    https://kojipkgs.fedoraproject.org//packages/mock/1.3.4/1.fc26/noarch/mock{,-lvm,-scm}-1.3.4-1.fc26.noarch.rpm
 
 # enable depchase and other modularity tools
 dnf -y install python3-solv python3-click fedora-packager
