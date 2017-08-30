@@ -17,15 +17,14 @@ dnf -y install --allowerasing \
 
 # add docker for using the boltron-preview to test
 dnf -y install docker atomic
-
-systemctl stop docker >& /dev/null || :
 groupadd docker >& /dev/null || :
 sed -i \
     -e "s|--group=docker ||" \
     -e "s|^OPTIONS=\(['\"]\)|OPTIONS=\1--group=docker |" \
     /etc/sysconfig/docker
 
-systemctl enable docker && systemctl start docker
+systemctl enable docker
+systemctl restart docker
 
 docker pull modularitycontainers/boltron-preview
 
