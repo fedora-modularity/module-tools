@@ -1,6 +1,46 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+
+# The provisioning scripts catch some commands' non-zero exit codes to cope
+# with subsequent runs.
+
+$root_script = <<EOF
+dnf -y update
+dnf -y install git make pkgwat
+
+# make sure we stick to py2 for everything
+dnf -y --enablerepo=updates-testing install module-build-service python2-modulemd python2-pdc-client mock-scm
+
+# add docker for using the boltron-preview to test
+dnf -y install docker atomic
+
+systemctl stop docker > /dev/null 2>&1 || :
+groupadd docker > /dev/null 2>&1 || :
+
+usermod -a -G docker vagrant
+systemctl enable docker && systemctl start docker
+
+chown root:docker /var/run/docker.sock
+docker pull modularitycontainers/boltron-preview
+
+usermod -a -G mock vagrant
+
+dnf -y install --allowerasing \
+    https://kojipkgs.fedoraproject.org//packages/mock/1.3.4/1.fc26/noarch/mock{,-lvm,-scm}-1.3.4-1.fc26.noarch.rpm
+
+# enable depchase and other modularity tools
+dnf -y install python3-solv python3-click fedora-packager
+EOF
+
+$user_script = <<EOF
+mkdir ~/modularity-tools/ > /dev/null 2>&1 || :
+git clone https://github.com/fedora-modularity/baseruntime-package-lists.git ~/modularity-tools/baseruntime-package-lists > /dev/null 2>&1 || :
+git clone https://github.com/fedora-modularity/depchase.git ~/modularity-tools/depchase > /dev/null 2>&1 || :
+cd ~/modularity-tools/depchase && git checkout verbose
+EOF
+
+
 Vagrant.configure(2) do |config|
   config.vm.box = "fedora/26-cloud-base"
   config.vm.define :vagrant_module_builder do |vagrant_host|
@@ -15,30 +55,7 @@ Vagrant.configure(2) do |config|
       domain.memory = guest_memory
     end
 
-    vagrant_host.vm.provision "shell", inline: "sudo dnf -y update"
-    vagrant_host.vm.provision "shell", inline: "sudo dnf -y install git make pkgwat"
-    #make sure we stick to py2 for everything
-    vagrant_host.vm.provision "shell", inline: "sudo dnf install -y --enablerepo=updates-testing module-build-service python2-modulemd python2-pdc-client mock-scm"
-    #add docker for using the boltron-preview to test
-    vagrant_host.vm.provision "shell", inline: "sudo dnf install -y docker atomic"
-    vagrant_host.vm.provision 'shell', inline: "sudo systemctl stop docker > /dev/null 2>&1 || :" #in case this isn't first run
-    vagrant_host.vm.provision 'shell', inline: "sudo groupadd docker > /dev/null 2>&1 || :" #in case this isn't first run
-    vagrant_host.vm.provision 'shell', inline: "sudo usermod -a -G docker vagrant"
-    vagrant_host.vm.provision 'shell', inline: "sudo systemctl enable docker && sudo systemctl start docker"
-    vagrant_host.vm.provision 'shell', inline: "sudo chown root:docker /var/run/docker.sock"
-    vagrant_host.vm.provision 'shell', inline: "sudo docker pull modularitycontainers/boltron-preview"
-
-    vagrant_host.vm.provision "shell", inline: "sudo usermod -a -G mock vagrant"
-    vagrant_host.vm.provision "shell", inline: "sudo dnf install --allowerasing -y https://kojipkgs.fedoraproject.org//packages/mock/1.3.4/1.fc26/noarch/mock-1.3.4-1.fc26.noarch.rpm"
-    vagrant_host.vm.provision "shell", inline: "sudo dnf install --allowerasing -y https://kojipkgs.fedoraproject.org//packages/mock/1.3.4/1.fc26/noarch/mock-lvm-1.3.4-1.fc26.noarch.rpm"
-    vagrant_host.vm.provision "shell", inline: "sudo dnf install --allowerasing -y https://kojipkgs.fedoraproject.org//packages/mock/1.3.4/1.fc26/noarch/mock-scm-1.3.4-1.fc26.noarch.rpm"
-
-    #enable depchase and other modularity tools
-    vagrant_host.vm.provision "shell", inline: "sudo dnf -y install python3-solv python3-click fedora-packager"
-    vagrant_host.vm.provision "shell", inline: "mkdir ~/modularity-tools/ > /dev/null 2>&1 || :" #in case this isn't first run
-    vagrant_host.vm.provision "shell", inline: "git clone https://github.com/fedora-modularity/baseruntime-package-lists.git ~/modularity-tools/baseruntime-package-lists > /dev/null 2>&1 || :" #in case this isn't first run
-    vagrant_host.vm.provision "shell", inline: "git clone https://github.com/fedora-modularity/depchase.git ~/modularity-tools/depchase > /dev/null 2>&1 || :" #in case this isn't first run
-    vagrant_host.vm.provision "shell", inline: "cd ~/modularity-tools/depchase && git checkout verbose"
-
+    vagrant_host.vm.provision "shell", inline: $root_script, privileged: true
+    vagrant_host.vm.provision "shell", inline: $user_script, privileged: false
   end
 end
