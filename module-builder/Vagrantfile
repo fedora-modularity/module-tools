@@ -21,16 +21,15 @@ dnf -y install docker atomic
 systemctl stop docker >& /dev/null || :
 groupadd docker >& /dev/null || :
 
-usermod -a -G docker vagrant
 systemctl enable docker && systemctl start docker
 
 chown root:docker /var/run/docker.sock
 docker pull modularitycontainers/boltron-preview
 
-usermod -a -G mock vagrant
-
 # enable depchase and other modularity tools
 dnf -y install python3-solv python3-click fedora-packager
+
+usermod -a -G mock,docker vagrant
 EOF
 
 $user_script = <<'EOF'
