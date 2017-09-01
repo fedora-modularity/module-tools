@@ -1,0 +1,9 @@
+---
+document: box-configuration
+configuration:
+    # cpus: how many cpus the box should use
+    cpus: 4
+    # memory: how much memory to use for the box
+    #         values < 1: fraction of available RAM,
+    #         values >= 1: absolute memory in GB
+    memory: 0.25

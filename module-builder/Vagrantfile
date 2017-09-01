@@ -42,16 +42,41 @@ cd ~/modularity-tools/depchase && git checkout verbose
 EOF
 
 
+class ::Hash
+  def deep_merge(second)
+    deep_merger = proc { |key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &deep_merger) : v2 }
+    return self.merge(second, &deep_merger)
+  end
+
+  def deep_merge!(second)
+    self.replace(self.deep_merge(second))
+  end
+end
+
+
+require 'yaml'
+dir = File.dirname(File.expand_path(__FILE__))
+
+config_doc = YAML::load_file("#{dir}/defaults.yaml")
+
+if File.exist?("#{dir}/config.yaml")
+  local_doc = YAML::load_file("#{dir}/config.yaml")
+  config_doc.deep_merge! local_doc
+end
+
+$config = config_doc['configuration']
+
+
 Vagrant.configure(2) do |config|
   config.vm.box = "fedora/26-cloud-base"
   config.vm.define :vagrant_module_builder do |vagrant_host|
     vagrant_host.vm.provider :libvirt do |domain|
-      domain.cpus = 4
-      # cap guest size at RAM / 4, max 16GB
-      host_memory = `grep 'MemTotal' /proc/meminfo | sed -e 's/MemTotal://' -e 's/ kB//'`.to_i / 1024
-      guest_memory = host_memory / 4
-      if guest_memory > 16384
-          guest_memory = 16384
+      domain.cpus = $config['cpus']
+      mem = $config['memory']
+      if mem < 1
+        guest_memory = `grep 'MemTotal' /proc/meminfo | sed -e 's/MemTotal://' -e 's/ kB//'`.to_i / 1024 * $config['memory']
+      else
+        guest_memory = 1024 * $config['memory']
       end
       domain.memory = guest_memory
     end
