@@ -84,4 +84,11 @@ Vagrant.configure(2) do |config|
     vagrant_host.vm.provision "shell", inline: $root_script, privileged: true
     vagrant_host.vm.provision "shell", inline: $user_script, privileged: false
   end
+
+  config.vm.synced_folder(File.expand_path($config['folders']['modules']),
+                          "/home/vagrant/modules",
+                          **$config['folders']['mount_options'])
+  config.vm.synced_folder(File.expand_path($config['folders']['modulebuild']),
+                          "/home/vagrant/modulebuild",
+                          **$config['folders']['mount_options'])
 end

@@ -7,3 +7,18 @@ configuration:
     #         values < 1: fraction of available RAM,
     #         values >= 1: absolute memory in GB
     memory: 0.25
+    folders:
+        # paths relative to working directory, using tilde expansion
+        # modules: where the module repositories live, gets mounted inside the
+        # box in ~vagrant/modules
+        modules: "modules"
+        # modulebuild: where modules get build, gets mounted inside the box in
+        #              ~vagrant/modulebuild
+        modulebuild: "~/modulebuild"
+        # mount_options: what options to use for the Vagrant
+        #                config.vm.synced_folder method, these must be prefixed
+        #                with ':'!
+        mount_options:
+            :type: nfs
+            :nfs_version: 4
+            :nfs_udp: false
