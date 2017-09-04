@@ -12,7 +12,7 @@ configuration:
         # modules: where the module repositories live, gets mounted inside the
         # box in ~vagrant/modules
         modules: "modules"
-        # modulebuild: where modules get build, gets mounted inside the box in
+        # modulebuild: where modules get built, gets mounted inside the box in
         #              ~vagrant/modulebuild
         modulebuild: "~/modulebuild"
         # mount_options: what options to use for the Vagrant
