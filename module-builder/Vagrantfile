@@ -12,23 +12,10 @@ dnf -y install git make pkgwat mock{,-lvm,-scm}
 # make sure we stick to py2 for everything
 dnf -y --enablerepo=updates-testing install module-build-service python2-modulemd python2-pdc-client
 
-# add docker for using the boltron-preview to test
-dnf -y install docker atomic
-groupadd docker >& /dev/null || :
-sed -i \
-    -e "s|--group=docker ||" \
-    -e "s|^OPTIONS=\(['\"]\)|OPTIONS=\1--group=docker |" \
-    /etc/sysconfig/docker
-
-systemctl enable docker
-systemctl restart docker
-
-docker pull modularitycontainers/boltron-preview
-
 # enable depchase and other modularity tools
 dnf -y install python3-solv python3-click fedora-packager
 
-usermod -a -G mock,docker vagrant
+usermod -a -G mock vagrant
 EOF
 
 $user_script = <<'EOF'
